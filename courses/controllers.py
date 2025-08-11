@@ -74,7 +74,7 @@ def search_courses():
                 'message': validation_error,
                 'details': {'field': 'query', 'constraint': 'required'}
             }), 400
-        
+         
         # Executar busca
         course_service = CourseService()
         result = course_service.search_courses(search_request)
