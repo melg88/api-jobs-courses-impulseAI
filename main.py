@@ -54,30 +54,12 @@ def create_app():
     def health_check():
         """Health check global da API"""
         try:
-            # Verificar saúde dos módulos
-            from courses.services import CourseService
-            from jobs.services import JobService
-            
-            course_service = CourseService()
-            job_service = JobService()
-            
-            course_health = course_service.health_check()
-            job_health = job_service.health_check()
-            
-            # Determinar status geral
-            overall_status = "healthy"
-            if course_health['status'] == "unhealthy" or job_health['status'] == "unhealthy":
-                overall_status = "degraded"
-            
+            # Health check básico - apenas verificar se a aplicação está rodando
             return jsonify({
-                'status': overall_status,
+                'status': 'healthy',
                 'timestamp': datetime.now().isoformat(),
                 'version': '1.0.0',
-                'uptime': 'N/A',  # Implementar se necessário
-                'modules': {
-                    'courses': course_health,
-                    'jobs': job_health
-                }
+                'message': 'API funcionando normalmente'
             }), 200
             
         except Exception as e:

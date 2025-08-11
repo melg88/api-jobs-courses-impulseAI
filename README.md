@@ -117,8 +117,7 @@ X-API-Key: sua-api-key
 ```
 
 ### API Keys disponíveis:
-- `api-key-1-change-in-production`
-- `api-key-2-change-in-production`
+- `1e6a8d8f-9b0c-4c7e-8a3d-5f2b1c9d8e7a` 
 
 ## 🎯 Implementação Avançada do Udemy
 
@@ -444,6 +443,9 @@ O projeto inclui um pipeline completo de CI/CD configurado com:
 
 📖 **Documentação detalhada**: [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)
 
+### Troubleshooting
+Se o health check falhar, consulte: [docs/HEALTH_CHECK_TROUBLESHOOTING.md](docs/HEALTH_CHECK_TROUBLESHOOTING.md)
+
 ## 🔧 Configuração de Produção
 
 ### 1. SSL/TLS
@@ -492,5 +494,5 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 ## 📞 Suporte
 
 Para suporte, entre em contato através de:
-- Email: seu-email@exemplo.com
+- Email: melg@cin.ufpe.br
 - Issues: [GitHub Issues](https://github.com/seu-usuario/api-jobs-courses-impulseAI/issues)
