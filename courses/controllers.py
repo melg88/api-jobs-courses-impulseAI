@@ -8,6 +8,7 @@ from functools import wraps
 import logging
 from .services import CourseService
 from .models import CourseSearchRequest, CourseDetailRequest
+import os
 
 logger = logging.getLogger(__name__)
 
