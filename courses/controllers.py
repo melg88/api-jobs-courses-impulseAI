@@ -39,7 +39,7 @@ def require_api_key(f):
     return decorated_function
 
 @courses_bp.route('/', methods=['POST'])
-@require_api_key
+#@require_api_key
 def search_courses():
     """
     Endpoint para buscar cursos
