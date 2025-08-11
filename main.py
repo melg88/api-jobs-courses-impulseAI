@@ -26,10 +26,11 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+app = Flask(__name__)
 
 def create_app():
     """Factory function para criar a aplicação Flask"""
-    app = Flask(__name__)
+    """ app = Flask(__name__) """
     
     # Configurações
     app.config['SECRET_KEY'] = os.getenv('API_SECRET_KEY', 'your-super-secret-key-change-this-in-production')
