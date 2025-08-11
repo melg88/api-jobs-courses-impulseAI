@@ -27,7 +27,7 @@ def require_api_key(f):
             }), 401
         
         # Aqui você pode adicionar validação da API key
-        valid_keys = ['api-key-1-change-in-production', 'api-key-2-change-in-production']
+        valid_keys = [os.getenv('API_KEY_CLIENT', 'api-key-1-change-in-production')]
         if api_key not in valid_keys:
             return jsonify({
                 'error': 'authentication_error',

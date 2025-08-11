@@ -60,8 +60,7 @@ LINKEDIN_EMAIL=seu-email@exemplo.com
 LINKEDIN_PASSWORD=sua-senha
 
 # API Keys para clientes
-API_KEY_CLIENT1=api-key-1-change-in-production
-API_KEY_CLIENT2=api-key-2-change-in-production
+API_KEY_CLIENT=api-key-1-change-in-production
 
 # Configurações de logging
 LOG_LEVEL=INFO
