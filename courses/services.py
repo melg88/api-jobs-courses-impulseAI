@@ -53,7 +53,8 @@ class CourseService:
             raw_courses = self.scraper.search_courses(
                 query=request.query,
                 platform=request.platform,
-                limit=request.limit
+                limit=request.limit,
+                language=request.language
             )
             
             # Converter para objetos Course

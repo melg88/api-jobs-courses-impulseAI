@@ -43,7 +43,7 @@ class CourseScraper:
             logger.error(f"Erro ao configurar driver: {str(e)}")
             return False
     
-    def search_courses(self, query: str, platform: str = "all", limit: int = 10) -> List[Dict]:
+    def search_courses(self, query: str, platform: str = "all", limit: int = 10, language: str = "pt") -> List[Dict]:
         """
         Busca cursos em diferentes plataformas
         
@@ -59,7 +59,7 @@ class CourseScraper:
         
         try:
             if platform.lower() == "all" or platform.lower() == "udemy":
-                udemy_courses = self._search_udemy(query, limit)
+                udemy_courses = self._search_udemy(query, limit, language)
                 courses.extend(udemy_courses)
             
             if platform.lower() == "all" or platform.lower() == "coursera":
@@ -80,7 +80,7 @@ class CourseScraper:
             logger.error(f"Erro na busca de cursos: {str(e)}")
             return []
     
-    def _search_udemy(self, query: str, limit: int) -> List[Dict]:
+    def _search_udemy(self, query: str, limit: int, language: str) -> List[Dict]:
         """Busca cursos na Udemy usando cloudscraper e pandas"""
         try:
             # Headers específicos para Udemy
@@ -95,7 +95,7 @@ class CourseScraper:
             for i in range(1, max_pages + 1):
                 try:
                     # URL da API da Udemy
-                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query}&skip_price=true&lang=pt&p={i}'
+                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query}&skip_price=true&lang={language}&p={i}'
                     
                     response = self.udemy_scraper.get(url_api, headers=headers)
                     response.raise_for_status()
