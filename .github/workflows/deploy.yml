@@ -1,0 +1,110 @@
+# .github/workflows/main.yml
+
+name: CI/CD Pipeline - Deploy to Railway
+
+on:
+  push:
+    branches: [ main ] # Recomenda-se usar apenas 'main' para deploys
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  test-and-scan:
+    name: Test & Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov flake8 bandit
+        
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: Run tests with pytest
+      run: |
+        python -m pytest tests/ -v --cov=. --cov-report=xml
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # É uma boa prática usar um token
+        fail_ci_if_error: false
+
+    - name: Run Bandit security scan
+      run: |
+        # Executa o scan. O || true evita que o pipeline falhe se vulnerabilidades forem encontradas.
+        bandit -r . -f json -o bandit-report.json || true
+        
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-report
+        path: bandit-report.json
+
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    needs: test-and-scan # Depende do sucesso dos testes e scans
+    if: github.ref == 'refs/heads/main' # Apenas executa o deploy em push para a branch 'main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Railway CLI
+      run: npm install -g @railway/cli
+      
+    - name: Deploy to Railway
+      run: railway up --detach
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }} # Autenticação via variável de ambiente
+        # Não é preciso o RAILWAY_PROJECT_ID se você já linkou o repo na UI do Railway
+        # Se não, adicione: RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+        
+    - name: Wait for deployment and run Health Check
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        RAILWAY_URL: ${{ secrets.RAILWAY_URL }} # Certifique-se que este secret existe no GitHub
+      run: |
+        echo "✅ Deploy command sent. Waiting for new version to be live..."
+        # O comando 'railway status' pode ser usado para verificar o progresso
+        # Para um health check robusto, use um loop
+        for i in {1..10}; do
+          # O curl falhará silenciosamente (-s), mas o -f fará com que retorne um erro se o status não for 2xx
+          if curl -sf "$RAILWAY_URL/health"; then
+            echo "🌐 Health check successful!"
+            # Notificação de sucesso
+            echo "✅ Deploy to $RAILWAY_URL was successful!"
+            exit 0
+          fi
+          echo "Attempt $i/10 failed. Retrying in 15 seconds..."
+          sleep 15
+        done
+        echo "❌ Health check failed after several attempts."
+        # Notificação de falha
+        echo "❌ Deploy failed! Check the Railway logs."
+        exit 1

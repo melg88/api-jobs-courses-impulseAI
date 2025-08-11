@@ -1,0 +1,624 @@
+openapi: 3.0.3
+info:
+  title: API de Web Scraping - Vagas e Cursos
+  description: |
+    API Flask para web scraping de vagas de emprego (LinkedIn) e cursos online (Udemy, Coursera, edX).
+    
+    ## Funcionalidades Principais
+    
+    - **Busca de Vagas**: Scraping de vagas no LinkedIn
+    - **Busca de Cursos**: Scraping de cursos em múltiplas plataformas (Udemy, Coursera, edX)
+    - **Autenticação**: Sistema de API keys para controle de acesso
+    - **Rate Limiting**: Proteção contra abuso da API
+    
+    ## Implementação Avançada do Udemy
+    
+    A API utiliza `cloudscraper` para contornar proteções anti-bot da Udemy e `pandas` para processamento e ordenação dos dados.
+    
+    ## Autenticação
+    
+    Todas as requisições devem incluir o header `X-API-Key` com uma das chaves válidas.
+    
+    ## Rate Limiting
+    
+    - Vagas: 10 requisições por minuto
+    - Cursos: 10 requisições por minuto
+    - Detalhes: 20 requisições por minuto
+    - Global: 200 requisições por dia, 50 por hora
+  version: 1.0.0
+  contact:
+    name: Suporte da API
+    email: suporte@exemplo.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.exemplo.com
+    description: Servidor de Produção
+  - url: http://localhost:5000
+    description: Servidor Local de Desenvolvimento
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Verifica o status de saúde da API
+      tags:
+        - Monitoramento
+      responses:
+        '200':
+          description: API funcionando normalmente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-15T10:30:00Z"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  uptime:
+                    type: number
+                    example: 3600.5
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/jobs:
+    post:
+      summary: Buscar Vagas
+      description: |
+        Busca vagas de emprego no LinkedIn baseado nos critérios fornecidos.
+        
+        **Plataforma**: LinkedIn
+        **Rate Limit**: 10 requisições por minuto
+      tags:
+        - Vagas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: Termo de busca para a vaga
+                  example: "Python Developer"
+                location:
+                  type: string
+                  description: Localização da vaga (opcional)
+                  example: "São Paulo"
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  default: 10
+                  description: Número máximo de resultados
+                  example: 10
+                experience_level:
+                  type: string
+                  enum: [entry, associate, mid-senior, senior, executive]
+                  description: Nível de experiência desejado
+                  example: "mid-senior"
+                job_type:
+                  type: string
+                  enum: [full-time, part-time, contract, temporary, internship]
+                  description: Tipo de contratação
+                  example: "full-time"
+      responses:
+        '200':
+          description: Lista de vagas encontradas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  jobs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  total:
+                    type: integer
+                    example: 25
+                  query:
+                    type: string
+                    example: "Python Developer"
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: API key inválida ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/jobs/{job_id}:
+    get:
+      summary: Obter Detalhes de Vaga
+      description: |
+        Obtém detalhes completos de uma vaga específica pelo ID.
+        
+        **Rate Limit**: 20 requisições por minuto
+      tags:
+        - Vagas
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          description: ID único da vaga
+          schema:
+            type: string
+          example: "linkedin_123456789"
+      responses:
+        '200':
+          description: Detalhes da vaga
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobDetail'
+        '404':
+          description: Vaga não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: API key inválida ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/courses:
+    post:
+      summary: Buscar Cursos
+      description: |
+        Busca cursos online em múltiplas plataformas (Udemy, Coursera, edX).
+        
+        **Plataformas Suportadas**:
+        - **Udemy**: Implementação avançada com cloudscraper
+        - **Coursera**: API oficial
+        - **edX**: API oficial
+        
+        **Rate Limit**: 10 requisições por minuto
+      tags:
+        - Cursos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: Termo de busca para o curso
+                  example: "Machine Learning"
+                platform:
+                  type: string
+                  enum: [all, udemy, coursera, edx]
+                  default: "all"
+                  description: Plataforma específica para busca
+                  example: "udemy"
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  default: 10
+                  description: Número máximo de resultados
+                  example: 10
+                level:
+                  type: string
+                  enum: [beginner, intermediate, advanced, all]
+                  description: Nível do curso
+                  example: "beginner"
+                language:
+                  type: string
+                  description: Idioma do curso
+                  example: "English"
+                price_range:
+                  type: string
+                  enum: [free, paid, all]
+                  default: "all"
+                  description: Faixa de preço
+                  example: "all"
+      responses:
+        '200':
+          description: Lista de cursos encontrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  courses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  total:
+                    type: integer
+                    example: 45
+                  query:
+                    type: string
+                    example: "Machine Learning"
+                  platform:
+                    type: string
+                    example: "udemy"
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: API key inválida ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/courses/{course_id}:
+    get:
+      summary: Obter Detalhes de Curso
+      description: |
+        Obtém detalhes completos de um curso específico pelo ID.
+        
+        **Rate Limit**: 20 requisições por minuto
+      tags:
+        - Cursos
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          description: ID único do curso (formato: platform_id)
+          schema:
+            type: string
+          example: "udemy_123456"
+      responses:
+        '200':
+          description: Detalhes do curso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        '404':
+          description: Curso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: API key inválida ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API Key para autenticação. Use uma das seguintes chaves:
+        - `api-key-1-change-in-production`
+        - `api-key-2-change-in-production`
+        
+        **⚠️ IMPORTANTE**: Em produção, use suas próprias chaves seguras.
+
+  schemas:
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único da vaga
+          example: "linkedin_123456789"
+        title:
+          type: string
+          description: Título da vaga
+          example: "Python Developer"
+        company:
+          type: string
+          description: Nome da empresa
+          example: "Tech Corp"
+        location:
+          type: string
+          description: Localização da vaga
+          example: "São Paulo, SP"
+        description:
+          type: string
+          description: Descrição resumida da vaga
+          example: "Desenvolvedor Python para projeto inovador..."
+        url:
+          type: string
+          format: uri
+          description: URL da vaga no LinkedIn
+          example: "https://www.linkedin.com/jobs/view/123456789"
+        posted_date:
+          type: string
+          format: date-time
+          description: Data de publicação da vaga
+          example: "2024-01-15T10:30:00Z"
+        experience_level:
+          type: string
+          enum: [entry, associate, mid-senior, senior, executive]
+          description: Nível de experiência
+          example: "mid-senior"
+        job_type:
+          type: string
+          enum: [full-time, part-time, contract, temporary, internship]
+          description: Tipo de contratação
+          example: "full-time"
+        source:
+          type: string
+          description: Fonte dos dados
+          example: "linkedin"
+
+    JobDetail:
+      allOf:
+        - $ref: '#/components/schemas/Job'
+        - type: object
+          properties:
+            full_description:
+              type: string
+              description: Descrição completa da vaga
+              example: "Descrição detalhada com requisitos, responsabilidades..."
+            requirements:
+              type: array
+              items:
+                type: string
+              description: Lista de requisitos
+              example: ["Python 3+", "Django", "PostgreSQL"]
+            benefits:
+              type: array
+              items:
+                type: string
+              description: Lista de benefícios
+              example: ["Plano de saúde", "Vale refeição", "Home office"]
+            salary_range:
+              type: object
+              properties:
+                min:
+                  type: number
+                  example: 5000
+                max:
+                  type: number
+                  example: 8000
+                currency:
+                  type: string
+                  example: "BRL"
+            application_count:
+              type: integer
+              description: Número de candidatos
+              example: 150
+            skills:
+              type: array
+              items:
+                type: string
+              description: Habilidades necessárias
+              example: ["Python", "Django", "REST API"]
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do curso
+          example: "udemy_123456"
+        title:
+          type: string
+          description: Título do curso
+          example: "Python for Beginners"
+        instructor:
+          type: string
+          description: Nome do instrutor
+          example: "John Doe"
+        num_reviews:
+          type: integer
+          description: Número de avaliações
+          example: 1500
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          description: Avaliação média do curso
+          example: 4.5
+        students_count:
+          type: integer
+          description: Número de estudantes inscritos
+          example: 50000
+        price:
+          type: number
+          format: float
+          description: Preço atual do curso
+          example: 29.99
+        original_price:
+          type: number
+          format: float
+          description: Preço original do curso
+          example: 199.99
+        language:
+          type: string
+          description: Idioma do curso
+          example: "English"
+        duration:
+          type: string
+          description: Duração do curso
+          example: "10.5 hours"
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Nível do curso
+          example: "beginner"
+        url:
+          type: string
+          format: uri
+          description: URL do curso
+          example: "https://www.udemy.com/course/python-for-beginners/"
+        image_url:
+          type: string
+          format: uri
+          description: URL da imagem do curso
+          example: "https://img-c.udemycdn.com/course/480x270/123456.jpg"
+        description:
+          type: string
+          description: Descrição do curso
+          example: "Learn Python from scratch with hands-on projects"
+        source:
+          type: string
+          enum: [udemy, coursera, edx]
+          description: Plataforma do curso
+          example: "udemy"
+
+    CourseDetail:
+      allOf:
+        - $ref: '#/components/schemas/Course'
+        - type: object
+          properties:
+            full_description:
+              type: string
+              description: Descrição completa do curso
+              example: "Descrição detalhada com objetivos, conteúdo..."
+            curriculum:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: "Introduction to Python"
+                  duration:
+                    type: string
+                    example: "45 minutes"
+                  lectures:
+                    type: array
+                    items:
+                      type: string
+                    example: ["What is Python?", "Setting up your environment"]
+            requirements:
+              type: array
+              items:
+                type: string
+              description: Pré-requisitos do curso
+              example: ["Basic computer knowledge", "No programming experience needed"]
+            objectives:
+              type: array
+              items:
+                type: string
+              description: Objetivos de aprendizagem
+              example: ["Understand Python basics", "Build simple applications"]
+            last_updated:
+              type: string
+              format: date
+              description: Data da última atualização
+              example: "2024-01-15"
+            certificate:
+              type: boolean
+              description: Se o curso oferece certificado
+              example: true
+            subtitles:
+              type: array
+              items:
+                type: string
+              description: Idiomas das legendas disponíveis
+              example: ["English", "Spanish", "Portuguese"]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Tipo do erro
+          example: "validation_error"
+        message:
+          type: string
+          description: Mensagem de erro descritiva
+          example: "Invalid input parameters"
+        details:
+          type: object
+          description: Detalhes adicionais do erro
+          example:
+            field: "query"
+            value: ""
+            constraint: "required"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp do erro
+          example: "2024-01-15T10:30:00Z"
+        request_id:
+          type: string
+          description: ID único da requisição para rastreamento
+          example: "req_123456789"
+
+tags:
+  - name: Monitoramento
+    description: Endpoints para monitoramento da API
+  - name: Vagas
+    description: Endpoints para busca e detalhes de vagas de emprego
+  - name: Cursos
+    description: Endpoints para busca e detalhes de cursos online
+
+externalDocs:
+  description: Documentação adicional
+  url: https://github.com/seu-usuario/api-jobs-courses-impulseAI
