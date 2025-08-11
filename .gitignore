@@ -5,7 +5,7 @@
 
 # Logs
 #logs/
-*.log
+#*.log
 
 # Certificados SSL
 ssl/
