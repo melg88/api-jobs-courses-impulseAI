@@ -95,7 +95,7 @@ class CourseScraper:
             for i in range(1, max_pages + 1):
                 try:
                     # URL da API da Udemy
-                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query}&skip_price=true&locale=en&p={i}'
+                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query}&skip_price=true&lang=pt&p={i}'
                     
                     response = self.udemy_scraper.get(url_api, headers=headers)
                     response.raise_for_status()
