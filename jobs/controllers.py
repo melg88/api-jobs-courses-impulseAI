@@ -8,6 +8,7 @@ from functools import wraps
 import logging
 from .services import JobService
 from .models import JobSearchRequest, JobDetailRequest
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def require_api_key(f):
             }), 401
         
         # Aqui você pode adicionar validação da API key
-        valid_keys = ['api-key-1-change-in-production', 'api-key-2-change-in-production']
+        valid_keys = [os.getenv('API_KEY_CLIENT', 'api-key-1-change-in-production')]
         if api_key not in valid_keys:
             return jsonify({
                 'error': 'authentication_error',
@@ -38,7 +39,7 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@jobs_bp.route('', methods=['POST'])
+@jobs_bp.route('/', methods=['POST'])
 @require_api_key
 def search_jobs():
     """
