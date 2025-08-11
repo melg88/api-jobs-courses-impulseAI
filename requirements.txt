@@ -1,0 +1,19 @@
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-Limiter==3.5.0
+selenium==4.15.2
+linkedin-scraper==2.11.1
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+gunicorn==21.2.0
+python-dotenv==1.0.0
+cloudscraper==1.2.71
+pandas==2.1.4
+PyYAML==6.0.1
+
+# Dependências de teste e desenvolvimento
+pytest==7.4.3
+pytest-cov==4.1.0
+flake8==6.1.0
+bandit==1.7.5
