@@ -117,7 +117,7 @@ class CourseScraper:
                             "students_count": curso.get("num_students"),
                             "price": curso.get("price"),
                             "original_price": curso.get("price_detail", {}).get("list_price"),
-                            "language": curso.get("lang_s", {}).get("title"),
+                            "language": curso.get("lang_s"),
                             "duration": curso.get("content_info"),
                             "level": curso.get("instructional_level"),
                             "url": f"https://www.udemy.com{curso.get('url')}",
