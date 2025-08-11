@@ -4,8 +4,8 @@
 .env.production
 
 # Logs
-logs/
-*.log
+#logs/
+#*.log
 
 # Certificados SSL
 ssl/
