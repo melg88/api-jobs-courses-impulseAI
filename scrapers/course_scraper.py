@@ -43,7 +43,7 @@ class CourseScraper:
             logger.error(f"Erro ao configurar driver: {str(e)}")
             return False
     
-    def search_courses(self, query: str, platform: str = "all", limit: int = 10, language: str = "pt") -> List[Dict]:
+    def search_courses(self, query: str, platform: str = "all", limit: int = 10, language: str = "en") -> List[Dict]:
         """
         Busca cursos em diferentes plataformas
         
@@ -116,7 +116,7 @@ class CourseScraper:
                             "students_count": curso.get("num_students"),
                             "price": curso.get("price"),
                             "original_price": curso.get("price_detail", {}).get("list_price"),
-                            "language": curso.get("locale", {}).get("title"),
+                            "language": curso.get("lang_s", {}).get("title"),
                             "duration": curso.get("content_info"),
                             "level": curso.get("instructional_level"),
                             "url": f"https://www.udemy.com{curso.get('url')}",

@@ -62,7 +62,7 @@ def search_courses():
             platform=data.get('platform', 'all'),
             limit=data.get('limit', 10),
             level=data.get('level'),
-            language=data.get('language'),
+            language=data.get('language', 'en'),
             price_range=data.get('price_range', 'all')
         )
         
