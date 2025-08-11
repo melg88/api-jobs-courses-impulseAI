@@ -44,7 +44,7 @@ GET /health
 Busca vagas de emprego no LinkedIn.
 
 ```http
-POST /api/v1/jobs
+POST /api/v1/jobs/
 Content-Type: application/json
 X-API-Key: sua-api-key
 
@@ -88,14 +88,15 @@ X-API-Key: sua-api-key
 Busca cursos em múltiplas plataformas.
 
 ```http
-POST /api/v1/courses
+POST /api/v1/courses/
 Content-Type: application/json
 X-API-Key: sua-api-key
 
 {
   "query": "Machine Learning",
   "platform": "udemy",
-  "limit": 10
+  "limit": 10,
+  "language": "en"
 }
 ```
 
@@ -103,6 +104,7 @@ X-API-Key: sua-api-key
 - `query` (obrigatório): Termo de busca
 - `platform` (opcional): Plataforma específica (`udemy`, `coursera`, `edx`, `all`)
 - `limit` (opcional): Número máximo de resultados (padrão: 10)
+- `language` (opcional): Sigla da linguagem desejada
 
 **Resposta:**
 ```json
@@ -287,7 +289,7 @@ client.searchJobs('Python Developer', 'São Paulo', 5)
     .catch(error => console.error('Erro:', error));
 
 // Buscar cursos
-client.searchCourses('Machine Learning', 'udemy', 5)
+client.searchCourses('Machine Learning', 'udemy', 5, 'en')
     .then(data => console.log('Cursos:', data))
     .catch(error => console.error('Erro:', error));
 ```
@@ -378,105 +380,6 @@ except Exception as e:
     print(f"Erro: {e}")
 ```
 
-### PHP
-```php
-<?php
-
-class APIClient {
-    private $baseURL;
-    private $apiKey;
-    private $headers;
-    
-    public function __construct($baseURL, $apiKey) {
-        $this->baseURL = rtrim($baseURL, '/');
-        $this->apiKey = $apiKey;
-        $this->headers = [
-            'X-API-Key: ' . $apiKey,
-            'Content-Type: application/json'
-        ];
-    }
-    
-    private function makeRequest($method, $endpoint, $data = null) {
-        $url = $this->baseURL . $endpoint;
-        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        
-        if ($method === 'POST') {
-            curl_setopt($ch, CURLOPT_POST, true);
-            if ($data) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            }
-        }
-        
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        
-        if ($httpCode >= 400) {
-            $errorData = json_decode($response, true);
-            throw new Exception('Erro da API: ' . ($errorData['error'] ?? 'Erro desconhecido'));
-        }
-        
-        return json_decode($response, true);
-    }
-    
-    public function searchJobs($query, $location = '', $limit = 10) {
-        $data = [
-            'query' => $query,
-            'location' => $location,
-            'limit' => $limit
-        ];
-        return $this->makeRequest('POST', '/api/v1/jobs', $data);
-    }
-    
-    public function searchCourses($query, $platform = 'all', $limit = 10) {
-        $data = [
-            'query' => $query,
-            'platform' => $platform,
-            'limit' => $limit
-        ];
-        return $this->makeRequest('POST', '/api/v1/courses', $data);
-    }
-    
-    public function getJobDetails($jobId) {
-        return $this->makeRequest('GET', '/api/v1/jobs/' . $jobId);
-    }
-    
-    public function getCourseDetails($courseId) {
-        return $this->makeRequest('GET', '/api/v1/courses/' . $courseId);
-    }
-    
-    public function healthCheck() {
-        return $this->makeRequest('GET', '/health');
-    }
-}
-
-// Uso
-$client = new APIClient('https://sua-api.com', 'api-key-1-change-in-production');
-
-try {
-    // Verificar saúde
-    $health = $client->healthCheck();
-    echo "API Status: " . $health['status'] . "\n";
-    
-    // Buscar vagas
-    $jobs = $client->searchJobs('Python Developer', 'São Paulo', 5);
-    echo "Encontradas " . $jobs['count'] . " vagas\n";
-    
-    // Buscar cursos
-    $courses = $client->searchCourses('Machine Learning', 'udemy', 5);
-    echo "Encontrados " . $courses['count'] . " cursos\n";
-    
-} catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n";
-}
-
-?>
-```
 
 ## 🚨 Códigos de Erro
 

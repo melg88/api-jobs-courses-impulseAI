@@ -68,7 +68,7 @@ class Course:
     students_count: Optional[int] = None
     price: Optional[float] = None
     original_price: Optional[float] = None
-    language: Optional[str] = None
+    lang_s: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None
     url: Optional[str] = None
@@ -87,7 +87,7 @@ class Course:
             'students_count': self.students_count,
             'price': self.price,
             'original_price': self.original_price,
-            'language': self.language,
+            'language': self.lang_s,
             'duration': self.duration,
             'level': self.level,
             'url': self.url,
