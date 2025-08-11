@@ -91,20 +91,27 @@ jobs:
         RAILWAY_URL: ${{ secrets.RAILWAY_URL }} # Certifique-se que este secret existe no GitHub
       run: |
         echo "✅ Deploy command sent. Waiting for new version to be live..."
-        # O comando 'railway status' pode ser usado para verificar o progresso
-        # Para um health check robusto, use um loop
-        for i in {1..10}; do
-          # O curl falhará silenciosamente (-s), mas o -f fará com que retorne um erro se o status não for 2xx
-          if curl -sf "$RAILWAY_URL/health"; then
+        
+        # Aguardar um pouco mais para o deploy inicial
+        echo "⏳ Waiting 45 seconds for initial deployment..."
+        sleep 45
+        
+        # Health check com mais tentativas e intervalos maiores
+        for i in {1..15}; do
+          echo "🔍 Health check attempt $i/15..."
+          
+          # Tentar fazer o health check
+          if curl -sf --max-time 30 "$RAILWAY_URL/health"; then
             echo "🌐 Health check successful!"
-            # Notificação de sucesso
             echo "✅ Deploy to $RAILWAY_URL was successful!"
             exit 0
+          else
+            echo "❌ Health check attempt $i failed. Status code: $?"
+            echo "⏳ Waiting 20 seconds before next attempt..."
+            sleep 20
           fi
-          echo "Attempt $i/10 failed. Retrying in 15 seconds..."
-          sleep 15
         done
-        echo "❌ Health check failed after several attempts."
-        # Notificação de falha
+        
+        echo "❌ Health check failed after 15 attempts."
         echo "❌ Deploy failed! Check the Railway logs."
         exit 1
