@@ -8,6 +8,7 @@ from functools import wraps
 import logging
 from .services import CourseService
 from .models import CourseSearchRequest, CourseDetailRequest
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def require_api_key(f):
             }), 401
         
         # Aqui você pode adicionar validação da API key
-        valid_keys = ['api-key-1-change-in-production', 'api-key-2-change-in-production']
+        valid_keys = [os.getenv('API_KEY_CLIENT', 'api-key-1-change-in-production')]
         if api_key not in valid_keys:
             return jsonify({
                 'error': 'authentication_error',
@@ -38,7 +39,7 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@courses_bp.route('', methods=['POST'])
+@courses_bp.route('/', methods=['POST'])
 @require_api_key
 def search_courses():
     """
@@ -61,7 +62,7 @@ def search_courses():
             platform=data.get('platform', 'all'),
             limit=data.get('limit', 10),
             level=data.get('level'),
-            language=data.get('language'),
+            language=data.get('language', 'en'),
             price_range=data.get('price_range', 'all')
         )
         
@@ -73,7 +74,7 @@ def search_courses():
                 'message': validation_error,
                 'details': {'field': 'query', 'constraint': 'required'}
             }), 400
-        
+         
         # Executar busca
         course_service = CourseService()
         result = course_service.search_courses(search_request)

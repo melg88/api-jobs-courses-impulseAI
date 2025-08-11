@@ -34,8 +34,7 @@ class Config:
     
     # API Keys válidas
     VALID_API_KEYS = [
-        os.getenv('API_KEY_CLIENT1', 'api-key-1-change-in-production'),
-        os.getenv('API_KEY_CLIENT2', 'api-key-2-change-in-production')
+        os.getenv('API_KEY_CLIENT', 'api-key-1-change-in-production')
     ]
     
     # Configurações de plataformas de cursos
