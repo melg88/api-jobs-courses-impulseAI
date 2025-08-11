@@ -102,6 +102,7 @@ class CourseScraper:
                     
                     # Parsear a resposta JSON
                     data = response.json()
+                    print(data)
                     
                     # Extrair dados dos cursos
                     cursos = data.get("courses", [])
