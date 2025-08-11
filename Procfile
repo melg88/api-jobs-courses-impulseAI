@@ -1,1 +1,1 @@
-gunicorn --workers 4 --bind 0.0.0.0:$PORT main:app
+gunicorn --workers 4 --bind 0.0.0.0:5000 main:app
