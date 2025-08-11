@@ -38,7 +38,7 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@courses_bp.route('', methods=['POST'])
+@courses_bp.route('/', methods=['POST'])
 @require_api_key
 def search_courses():
     """
