@@ -106,8 +106,7 @@
 - `PORT=5000` - Porta da aplicação
 - `LINKEDIN_EMAIL` - Email do LinkedIn (opcional)
 - `LINKEDIN_PASSWORD` - Senha do LinkedIn (opcional)
-- `API_KEY_CLIENT1` - API key para clientes
-- `API_KEY_CLIENT2` - API key para clientes
+- `API_KEY_CLIENT` - API key para clientes
 - `LOG_LEVEL=INFO` - Nível de logging
 
 ## 📊 Monitoramento

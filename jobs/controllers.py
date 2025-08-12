@@ -12,7 +12,7 @@ from .models import JobSearchRequest, JobDetailRequest
 logger = logging.getLogger(__name__)
 
 # Blueprint para rotas de vagas
-jobs_bp = Blueprint('jobs', __name__, url_prefix='/api/v1/jobs')
+jobs_bp = Blueprint('jobs', __name__, url_prefix='/api/v1/jobs/')
 
 def require_api_key(f):
     """Decorator para verificar API key"""
@@ -27,7 +27,7 @@ def require_api_key(f):
             }), 401
         
         # Aqui você pode adicionar validação da API key
-        valid_keys = ['api-key-1-change-in-production', 'api-key-2-change-in-production']
+        valid_keys = [os.getenv('API_KEY_CLIENT', 'api-key-1-change-in-production')]
         if api_key not in valid_keys:
             return jsonify({
                 'error': 'authentication_error',
@@ -38,12 +38,12 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@jobs_bp.route('', methods=['POST'])
+@jobs_bp.route('/', methods=['POST'])
 @require_api_key
 def search_jobs():
     """
     Endpoint para buscar vagas de emprego
-    POST /api/v1/jobs
+    POST /api/v1/jobs/
     """
     try:
         # Validar dados de entrada
