@@ -108,6 +108,7 @@ class JobScraper:
                         'url': getattr(job, 'job_url', ''),
                         'source': 'linkedin'
                     }
+                    print(job_data)
                     jobs.append(job_data)
                     
                 except Exception as e:
