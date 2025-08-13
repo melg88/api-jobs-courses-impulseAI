@@ -19,9 +19,9 @@ class Config:
     LOG_FILE = 'logs/app.log'
     
     # Configurações de rate limiting
-    RATE_LIMIT_DEFAULT = "200 per day"
-    RATE_LIMIT_HOURLY = "50 per hour"
-    RATE_LIMIT_MINUTE = "10 per minute"
+    RATE_LIMIT_DEFAULT = "20000 per day"
+    RATE_LIMIT_HOURLY = "1800 per hour"
+    RATE_LIMIT_MINUTE = "30 per minute"
     
     # Configurações de scraping
     SCRAPER_TIMEOUT = 30
