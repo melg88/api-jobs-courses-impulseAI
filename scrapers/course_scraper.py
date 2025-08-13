@@ -144,40 +144,37 @@ class CourseScraper:
                             "source": "udemy"
                         }
                         cursos_totais.append(curso_data)
-
                     except Exception as e_curso:
                         logger.warning(f"Falha ao processar um curso (ID: {curso.get('id')}). Pulando. Erro: {e_curso}")
                         continue # Pula para o próximo curso, mas não para a próxima página
 
                 time.sleep(1) # Pausa entre as requisições de página
-
             except requests.exceptions.HTTPError as e_http:
                 logger.error(f"Erro HTTP na página {i}: {e_http}. Resposta: {e_http.response.text[:200]}")
                 break # Se houver erro HTTP (como 403), para a busca
-        except Exception as e_page:
-            logger.error(f"Erro ao buscar página {i} da Udemy: {e_page}")
-            continue # Tenta a próxima página
+            except Exception as e_page:
+                logger.error(f"Erro ao buscar página {i} da Udemy: {e_page}")
+                continue # Tenta a próxima página
 
-        # 5. Processamento Final com Pandas
-        if cursos_totais:
-            df = pd.DataFrame(cursos_totais)
-            # Remove duplicatas caso a API retorne o mesmo curso em páginas diferentes
-            df.drop_duplicates(subset=['id'], keep='first', inplace=True) 
+            # 5. Processamento Final com Pandas
+            if cursos_totais:
+                df = pd.DataFrame(cursos_totais)
+                # Remove duplicatas caso a API retorne o mesmo curso em páginas diferentes
+                df.drop_duplicates(subset=['id'], keep='first', inplace=True) 
 
-            if 'rating' in df.columns and 'num_reviews' in df.columns:
-                df = df.sort_values(by=['rating', 'num_reviews'], ascending=[False, False])
+                if 'rating' in df.columns and 'num_reviews' in df.columns:
+                    df = df.sort_values(by=['rating', 'num_reviews'], ascending=[False, False])
             
-            # Limita ao número de cursos solicitados e converte para dicionário
-            cursos_finais = df.head(limit).to_dict('records')
-            logger.info(f"Busca finalizada. Total de {len(cursos_finais)} cursos processados.")
-            return cursos_finais
-        
-        logger.info("Nenhum curso encontrado após a busca.")
-        return []
+                # Limita ao número de cursos solicitados e converte para dicionário
+                cursos_finais = df.head(limit).to_dict('records')
+                logger.info(f"Busca finalizada. Total de {len(cursos_finais)} cursos processados.")
+                return cursos_finais
+            logger.info("Nenhum curso encontrado após a busca.")
+            return []
 
-    except Exception as e_main:
-        logger.error(f"Erro crítico na função _search_udemy: {e_main}")
-        return []
+        except Exception as e_main:
+            logger.error(f"Erro crítico na função _search_udemy: {e_main}")
+            return []
             """ for i in range(1, max_pages + 1):
                 try:
 
@@ -245,7 +242,7 @@ class CourseScraper:
         except Exception as e:
             logger.error(f"Erro ao buscar cursos na Udemy: {str(e)}")
             return []
-    """
+        """
     def _search_coursera(self, query: str, limit: int) -> List[Dict]:
         """Busca cursos na Coursera"""
         try:
