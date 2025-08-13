@@ -51,8 +51,8 @@ class JobService:
             
             # Executar busca usando o scraper
             raw_jobs = self.scraper.search_jobs(
-                query=request.query,
-                location=request.location,
+                query=request.query or "",       # A correção está aqui
+                location=request.location or "", # E aqui
                 limit=request.limit
             )
             
