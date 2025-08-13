@@ -85,7 +85,7 @@ class JobScraper:
         
         logger.info(f"Iniciando busca por '{query}' em '{location}'. Limite: {limit} vagas.")
 
-        for page in range(max_pages_to_scrape):
+        for page in range(pages_to_scrape):
             # Condição de parada: se já atingimos o limite, não precisamos buscar mais páginas.
             if len(all_job_cards) >= limit:
                 break
