@@ -84,17 +84,24 @@ class CourseScraper:
     
     def _search_udemy(self, query: str, limit: int, language: str) -> List[Dict]:
         """Busca cursos na Udemy usando cloudscraper e pandas"""
+        if query != "":
+            query_optimized = quote_plus(query)
         try:
             # Headers específicos para Udemy
             headers = {
-                "Referer": f"https://www.udemy.com/courses/search/?p=1&q={query}&src=ukw",
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Referer': f'https://www.udemy.com/courses/search/?q={query_optimized}&src=ukw&p=1',
+                'Accept-Encoding': 'gzip, deflate, br, zstd',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                #"Referer": f"https://www.udemy.com/courses/search/?p=1&q={query}&src=ukw",
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
             }
             
             cursos_totais = []
             max_pages = min(3, (limit // 12) + 1)  # Udemy retorna ~12 cursos por página
-            if query != "":
-                query_optimized = quote_plus(query)
+
             
             for i in range(1, max_pages + 1):
                 try:
