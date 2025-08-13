@@ -23,6 +23,7 @@ API Flask para web scraping de vagas de emprego (LinkedIn) e cursos online (Udem
 ### Dependências Especiais
 - **cloudscraper**: Para contornar proteções anti-bot da Udemy
 - **pandas**: Para processamento e ordenação de dados dos cursos
+- **linkedin_scrapper**: Para busca de dados na api do linkedin
 
 ## 🛠️ Instalação e Deploy
 
@@ -43,6 +44,7 @@ API Flask para web scraping de vagas de emprego (LinkedIn) e cursos online (Udem
    - Faça push para `main` ou `master`
    - O pipeline executará automaticamente
    - Acesse a URL gerada pelo Railway
+   - Para ambiente de desenvolvimento, PR para a branch `feature/api-web-scraping`
 
 📖 **Documentação completa**: [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)
 
@@ -50,13 +52,13 @@ API Flask para web scraping de vagas de emprego (LinkedIn) e cursos online (Udem
 
 #### 1. Clone o repositório
 ```bash
-git clone <seu-repositorio>
+git clone <https://github.com/melg88/api-jobs-courses-impulseAI>
 cd api-jobs-courses-impulseAI
 ```
 
 #### 2. Configure as variáveis de ambiente
 ```bash
-cp config/env.example .env
+cp config/env.example .env (para uso local)
 # Edite o arquivo .env com suas configurações
 ```
 
@@ -75,10 +77,10 @@ docker-compose logs -f api
 # Instalar dependências
 pip install -r requirements.txt
 
-# Configurar variáveis de ambiente
-export API_SECRET_KEY="sua-chave-secreta"
-export LINKEDIN_EMAIL="seu-email@exemplo.com"
-export LINKEDIN_PASSWORD="sua-senha"
+# Configurar variáveis de ambiente 
+export API_SECRET_KEY="secret-key-uuid-secreta"
+export LINKEDIN_EMAIL="seu-email@exemplo.com" # não é necessário mas melhora a performance
+export LINKEDIN_PASSWORD="sua-senha" # não é necessário mas melhora a performance
 
 # Executar a aplicação
 python main.py
@@ -128,6 +130,7 @@ X-API-Key: sua-api-key
 - **Processamento com Pandas**: Usa `pandas` para ordenar cursos por rating e número de reviews
 - **Rate Limiting Inteligente**: Pausa entre requisições para evitar bloqueios
 - **Logging Detalhado**: Logs para debug e monitoramento
+-- **Esteira dedicada no Github e Railway**: Acompanhamento e troubleshooting para deploy**
 
 ### Estrutura de Dados Retornada
 ```json
@@ -198,10 +201,10 @@ X-API-Key: sua-api-key
 ## 🔒 Segurança
 
 ### Rate Limiting
-- **Vagas**: 10 requisições por minuto
-- **Cursos**: 10 requisições por minuto
+- **Vagas**: 30 requisições por minuto
+- **Cursos**: 30 requisições por minuto
 - **Detalhes**: 20 requisições por minuto
-- **Global**: 200 requisições por dia, 50 por hora
+- **Global**: 3000 requisições por dia, 1800 por hora
 
 ### Headers de Segurança
 - X-Frame-Options: DENY
@@ -221,7 +224,7 @@ const baseURL = 'https://sua-api.com';
 // Buscar vagas
 const searchJobs = async () => {
   try {
-    const response = await axios.post(`${baseURL}/api/v1/jobs`, {
+    const response = await axios.post(`${baseURL}/api/v1/jobs/`, {
       query: 'Python Developer',
       location: 'São Paulo',
       limit: 10
@@ -241,7 +244,7 @@ const searchJobs = async () => {
 // Buscar cursos
 const searchCourses = async () => {
   try {
-    const response = await axios.post(`${baseURL}/api/v1/courses`, {
+    const response = await axios.post(`${baseURL}/api/v1/courses/`, {
       query: 'Machine Learning',
       platform: 'udemy',
       limit: 10
@@ -263,8 +266,9 @@ const searchCourses = async () => {
 ```python
 import requests
 
-api_key = 'sua-api-key'
-base_url = 'https://sua-api.com'
+api_key = '1e6a8d8f-9b0c-4c7e-8a3d-5f2b1c9d8e7a'
+base_url = 'api-jobs-courses-impulseai-develop.up.railway.app' # Develop 
+base_url = 'api-jobs-courses-impulseai.up.railway.app' # Production 
 
 headers = {
     'X-API-Key': api_key,
@@ -356,6 +360,7 @@ start swagger-ui.html  # Windows
 - **Autenticação**: Documentação do sistema de API keys
 - **Rate Limiting**: Informações sobre limites de uso
 - **Códigos de Erro**: Todos os possíveis códigos de resposta
+- **Testes Unitários**: Testes realizados na API e no Scraper de Cursos
 
 ## 🏗️ Estrutura do Projeto
 
@@ -438,7 +443,7 @@ O projeto inclui um pipeline completo de CI/CD configurado com:
 2. **Configure secrets** no GitHub:
    - `RAILWAY_TOKEN`
    - `RAILWAY_PROJECT_ID`
-3. **Faça push** para `main` ou `master`
+3. **Faça push** para `feature/api-web-scraping para develop e `main` paras Production
 4. **Acesse** a URL gerada pelo Railway
 
 📖 **Documentação detalhada**: [docs/CI_CD_SETUP.md](docs/CI_CD_SETUP.md)

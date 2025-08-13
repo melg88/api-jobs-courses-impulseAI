@@ -11,8 +11,8 @@ O projeto foi reorganizado seguindo o padrão de **Domain-Driven Design (DDD)** 
 #### 1. **`courses/`** - Módulo de Cursos
 - **`__init__.py`**: Marcação do pacote
 - **`controllers.py`**: Endpoints da API para cursos
-  - `POST /api/v1/courses` - Busca de cursos
-  - `GET /api/v1/courses/{course_id}` - Detalhes de curso
+  - `POST /api/v1/courses/` - Busca de cursos
+  - `GET /api/v1/courses/{course_id}` - Detalhes de curso - Não utilizado no MVP
   - `GET /api/v1/courses/health` - Health check
 - **`models.py`**: Modelos de dados e validações
   - `CourseSearchRequest` - Requisição de busca
@@ -30,7 +30,7 @@ O projeto foi reorganizado seguindo o padrão de **Domain-Driven Design (DDD)** 
 - **`__init__.py`**: Marcação do pacote
 - **`controllers.py`**: Endpoints da API para vagas
   - `POST /api/v1/jobs` - Busca de vagas
-  - `GET /api/v1/jobs/{job_id}` - Detalhes de vaga
+  - `GET /api/v1/jobs/{job_id}` - Detalhes de vaga - Não utilizado no MVP
   - `GET /api/v1/jobs/health` - Health check
 - **`models.py`**: Modelos de dados e validações
   - `JobSearchRequest` - Requisição de busca

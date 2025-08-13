@@ -35,7 +35,7 @@ class APIClient:
             }
             
             response = requests.post(
-                f"{self.base_url}/api/v1/jobs",
+                f"{self.base_url}/api/v1/jobs/",
                 json=data,
                 headers=self.headers
             )
@@ -54,7 +54,7 @@ class APIClient:
             }
             
             response = requests.post(
-                f"{self.base_url}/api/v1/courses",
+                f"{self.base_url}/api/v1/courses/",
                 json=data,
                 headers=self.headers
             )

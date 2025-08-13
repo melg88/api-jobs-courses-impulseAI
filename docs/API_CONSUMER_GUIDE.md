@@ -237,7 +237,7 @@ class APIClient {
 
     async searchJobs(query, location = '', limit = 10) {
         try {
-            const response = await this.client.post('/api/v1/jobs', {
+            const response = await this.client.post('/api/v1/jobs/', {
                 query,
                 location,
                 limit
@@ -250,7 +250,7 @@ class APIClient {
 
     async searchCourses(query, platform = 'all', limit = 10) {
         try {
-            const response = await this.client.post('/api/v1/courses', {
+            const response = await this.client.post('/api/v1/courses/', {
                 query,
                 platform,
                 limit
@@ -337,7 +337,7 @@ class APIClient:
             'location': location,
             'limit': limit
         }
-        return self._make_request('POST', '/api/v1/jobs', data)
+        return self._make_request('POST', '/api/v1/jobs/', data)
     
     def search_courses(self, query: str, platform: str = "all", limit: int = 10) -> Dict[str, Any]:
         """Busca cursos online"""
@@ -346,7 +346,7 @@ class APIClient:
             'platform': platform,
             'limit': limit
         }
-        return self._make_request('POST', '/api/v1/courses', data)
+        return self._make_request('POST', '/api/v1/courses/', data)
     
     def get_job_details(self, job_id: str) -> Dict[str, Any]:
         """Obtém detalhes de uma vaga"""

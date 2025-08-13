@@ -42,7 +42,7 @@ def create_app():
     limiter = Limiter(
         app=app,
         key_func=get_remote_address,
-        default_limits=["200 per day", "50 per hour"]
+        default_limits=["15000 per day", "3000 per hour"]
     )
     
     # Registrar blueprints
@@ -81,12 +81,12 @@ def create_app():
             'endpoints': {
                 'health': '/health',
                 'courses': {
-                    'search': 'POST /api/v1/courses',
+                    'search': 'POST /api/v1/courses/',
                     'details': 'GET /api/v1/courses/{course_id}',
                     'health': 'GET /api/v1/courses/health'
                 },
                 'jobs': {
-                    'search': 'POST /api/v1/jobs',
+                    'search': 'POST /api/v1/jobs/',
                     'details': 'GET /api/v1/jobs/{job_id}',
                     'health': 'GET /api/v1/jobs/health'
                 }
