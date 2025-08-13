@@ -167,7 +167,7 @@ class CourseScraper:
                     # Limita ao número de cursos solicitados e converte para dicionário
                     cursos_finais = df.head(limit).to_dict('records')
                     logger.info(f"Busca finalizada. Total de {len(cursos_finais)} cursos processados.")
-                    return cursos_finais
+                    return cursos_finais 
                 logger.info("Nenhum curso encontrado após a busca.")
                 return []
 
