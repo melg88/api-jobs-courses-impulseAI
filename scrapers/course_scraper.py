@@ -101,76 +101,75 @@ class CourseScraper:
             
             cursos_totais = []
             max_pages = min(3, (limit // 12) + 1)  # Udemy retorna ~12 cursos por página
+            for i in range(1, max_pages + 1):
+                try:
+                    # Usamos a URL correta da API com os parâmetros necessários
+                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?p={i}&page_size=16&q={query_optimized}&src=ukw&skip_price=true&lang={language}'
+                    logger.info(f"Buscando API na página {i}: {url_api}")
 
-            try:
-                # Usamos a URL correta da API com os parâmetros necessários
-                url_api = f'https://www.udemy.com/api-2.0/search-courses/?p={i}&page_size=16&q={query_optimized}&src=ukw&skip_price=true&lang={language}'
-                logger.info(f"Buscando API na página {i}: {url_api}")
-
-                response = self.udemy_scraper.get(url_api, headers=headers, timeout=10)
-                response.raise_for_status() # Lança exceção para erros HTTP 4xx/5xx
+                    response = self.udemy_scraper.get(url_api, headers=headers, timeout=10)
+                    response.raise_for_status() # Lança exceção para erros HTTP 4xx/5xx
                 
-                data = response.json()
-                cursos_na_pagina = data.get("courses", [])
+                    data = response.json()
+                    cursos_na_pagina = data.get("courses", [])
 
-                if not cursos_na_pagina:
-                    logger.info(f"Não há mais cursos na página {i}. Interrompendo a busca.")
-                    break # Se não houver cursos, para o loop
+                    if not cursos_na_pagina:
+                        logger.info(f"Não há mais cursos na página {i}. Interrompendo a busca.")
+                        break # Se não houver cursos, para o loop
 
-                # 4. Loop Seguro para Extração de Dados de Cada Curso
-                for curso in cursos_na_pagina:
-                    try:
-                        # Extração segura para evitar erros com dados ausentes
-                        instructors_list = curso.get("visible_instructors", [])
-                        instructor_name = instructors_list[0].get("display_name", "N/A") if instructors_list else "N/A"
+                    # 4. Loop Seguro para Extração de Dados de Cada Curso
+                    for curso in cursos_na_pagina:
+                        try:
+                            # Extração segura para evitar erros com dados ausentes
+                            instructors_list = curso.get("visible_instructors", [])
+                            instructor_name = instructors_list[0].get("display_name", "N/A") if instructors_list else "N/A"
                         
-                        price_detail = curso.get("price_detail", {}) or {} # Garante que não é None
+                            price_detail = curso.get("price_detail", {}) or {} # Garante que não é None
                         
-                        curso_data = {
-                            "id": f"udemy_{curso.get('id')}",
-                            "title": curso.get("title"),
-                            "instructor": instructor_name,
-                            "num_reviews": curso.get("num_reviews"),
-                            "rating": curso.get("rating"),
-                            "students_count": curso.get("num_students"),
-                            "price": curso.get("price"),
-                            "original_price": price_detail.get("list_price"),
-                            "language": curso.get("lang_s"),
-                            "duration": curso.get("content_info"),
-                            "level": curso.get("instructional_level_simple"),
-                            "url": f"https://www.udemy.com{curso.get('url')}",
-                            "image_url": curso.get("image_480x270"),
-                            "description": curso.get("headline"),
-                            "source": "udemy"
-                        }
-                        cursos_totais.append(curso_data)
-                    except Exception as e_curso:
-                        logger.warning(f"Falha ao processar um curso (ID: {curso.get('id')}). Pulando. Erro: {e_curso}")
-                        continue # Pula para o próximo curso, mas não para a próxima página
+                            curso_data = {
+                                "id": f"udemy_{curso.get('id')}",
+                                "title": curso.get("title"),
+                                "instructor": instructor_name,
+                                "num_reviews": curso.get("num_reviews"),
+                                "rating": curso.get("rating"),
+                                "students_count": curso.get("num_students"),
+                                "price": curso.get("price"),
+                                "original_price": price_detail.get("list_price"),
+                                "language": curso.get("lang_s"),
+                                "duration": curso.get("content_info"),
+                                "level": curso.get("instructional_level_simple"),
+                                "url": f"https://www.udemy.com{curso.get('url')}",
+                                "image_url": curso.get("image_480x270"),
+                                "description": curso.get("headline"),
+                                "source": "udemy"
+                            }
+                            cursos_totais.append(curso_data)
+                        except Exception as e_curso:
+                            logger.warning(f"Falha ao processar um curso (ID: {curso.get('id')}). Pulando. Erro: {e_curso}")
+                            continue # Pula para o próximo curso, mas não para a próxima página
+                    time.sleep(1) # Pausa entre as requisições de página
+                except requests.exceptions.HTTPError as e_http:
+                    logger.error(f"Erro HTTP na página {i}: {e_http}. Resposta: {e_http.response.text[:200]}")
+                    break # Se houver erro HTTP (como 403), para a busca
+                except Exception as e_page:
+                    logger.error(f"Erro ao buscar página {i} da Udemy: {e_page}")
+                    continue # Tenta a próxima página
 
-                time.sleep(1) # Pausa entre as requisições de página
-            except requests.exceptions.HTTPError as e_http:
-                logger.error(f"Erro HTTP na página {i}: {e_http}. Resposta: {e_http.response.text[:200]}")
-                break # Se houver erro HTTP (como 403), para a busca
-            except Exception as e_page:
-                logger.error(f"Erro ao buscar página {i} da Udemy: {e_page}")
-                continue # Tenta a próxima página
+                # 5. Processamento Final com Pandas
+                if cursos_totais:
+                    df = pd.DataFrame(cursos_totais)
+                    # Remove duplicatas caso a API retorne o mesmo curso em páginas diferentes
+                    df.drop_duplicates(subset=['id'], keep='first', inplace=True) 
 
-            # 5. Processamento Final com Pandas
-            if cursos_totais:
-                df = pd.DataFrame(cursos_totais)
-                # Remove duplicatas caso a API retorne o mesmo curso em páginas diferentes
-                df.drop_duplicates(subset=['id'], keep='first', inplace=True) 
-
-                if 'rating' in df.columns and 'num_reviews' in df.columns:
-                    df = df.sort_values(by=['rating', 'num_reviews'], ascending=[False, False])
+                    if 'rating' in df.columns and 'num_reviews' in df.columns:
+                        df = df.sort_values(by=['rating', 'num_reviews'], ascending=[False, False])
             
-                # Limita ao número de cursos solicitados e converte para dicionário
-                cursos_finais = df.head(limit).to_dict('records')
-                logger.info(f"Busca finalizada. Total de {len(cursos_finais)} cursos processados.")
-                return cursos_finais
-            logger.info("Nenhum curso encontrado após a busca.")
-            return []
+                    # Limita ao número de cursos solicitados e converte para dicionário
+                    cursos_finais = df.head(limit).to_dict('records')
+                    logger.info(f"Busca finalizada. Total de {len(cursos_finais)} cursos processados.")
+                    return cursos_finais
+                logger.info("Nenhum curso encontrado após a busca.")
+                return []
 
         except Exception as e_main:
             logger.error(f"Erro crítico na função _search_udemy: {e_main}")
