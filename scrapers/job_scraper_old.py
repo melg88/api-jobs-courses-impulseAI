@@ -1,5 +1,4 @@
 import logging
-import json
 import time
 import requests
 import urllib.parse
@@ -16,9 +15,8 @@ class JobScraper:
     """
     def __init__(self):
         """
-        Inicializa o scraper, carregando configurações e headers de um arquivo.
+        Inicializa o scraper, definindo os headers padrão para as requisições.
         """
-
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
@@ -81,18 +79,17 @@ class JobScraper:
         encoded_location = urllib.parse.quote_plus(location)
         
         all_job_cards = []
-        pages_to_scrape = (limit // 10) + 2
+        pages_to_scrape = (limit // 25) + 1
         
         logger.info(f"Iniciando busca por '{query}' em '{location}'. Limite: {limit} vagas.")
 
-        for page in range(max_pages_to_scrape):
-            # Condição de parada: se já atingimos o limite, não precisamos buscar mais páginas.
+        for page in range(pages_to_scrape):
             if len(all_job_cards) >= limit:
                 break
-        
-            start_index = page * 25 # O 'start' do LinkedIn ainda é baseado em 25
+            
+            start_index = page * 25
             url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={encoded_keywords}&location={encoded_location}&start={start_index}"
-        
+            
             logger.info(f"Buscando página {page + 1}...")
             soup = self._get_soup(url)
 
@@ -100,13 +97,12 @@ class JobScraper:
                 continue
 
             cards_on_page = self._parse_job_cards(soup)
-            # Condição de parada: se a página não retornou nenhuma vaga, paramos a busca.
             if not cards_on_page:
-                logger.info("Não foram encontradas mais vagas para esta busca.")
+                logger.info("Não foram encontradas mais vagas na página.")
                 break
-        
-            all_job_cards.extend(cards_on_page)
             
+            all_job_cards.extend(cards_on_page)
+
         # Processa os detalhes de cada vaga até atingir o limite
         final_jobs = []
         # Remove duplicatas por ID para evitar requisições repetidas
