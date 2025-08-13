@@ -93,13 +93,11 @@ class CourseScraper:
             
             cursos_totais = []
             max_pages = min(3, (limit // 12) + 1)  # Udemy retorna ~12 cursos por página
+            if query != "":
+                query_optimized = quote(query)
             
             for i in range(1, max_pages + 1):
                 try:
-                    if query != "":
-                        query_optimized = quote(query)
-                    else:
-                        query_optimized = query
 
                     # URL da API da Udemy
                     #url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query_optimized}&skip_price=true&lang={language}&p={i}'
@@ -109,7 +107,6 @@ class CourseScraper:
                     
                     # Parsear a resposta JSON
                     data = response.json()
-                    print(data)
                     
                     # Extrair dados dos cursos
                     cursos = data.get("courses", [])
