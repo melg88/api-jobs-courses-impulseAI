@@ -14,23 +14,13 @@ class JobScraper:
     A estrutura dos métodos foi organizada para maior clareza, mantendo
     a compatibilidade com o JobService.
     """
-    def __init__(self, config_path: str = 'config.json'):
+    def __init__(self):
         """
         Inicializa o scraper, carregando configurações e headers de um arquivo.
         """
-        try:
-            with open(config_path) as f:
-                self.config = json.load(f)
-        except FileNotFoundError:
-            logger.warning(f"Arquivo '{config_path}' não encontrado. Usando configuração padrão.")
-            self.config = {}
-        except json.JSONDecodeError:
-            logger.error(f"Erro ao decodificar o JSON em '{config_path}'.")
-            self.config = {}
-            
-        self.headers = self.config.get('headers', {
+        self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        })
+        }
 
     def _get_soup(self, url: str, retries: int = 3, delay: int = 2) -> Optional[BeautifulSoup]:
         """
