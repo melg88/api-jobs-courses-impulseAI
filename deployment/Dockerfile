@@ -4,17 +4,14 @@ FROM python:3.11-slim
 # Definir diretório de trabalho
 WORKDIR /app
 
-
-# Limpeza (opcional, mas recomendado para manter a imagem pequena)
-#RUN rm -rf /var/lib/apt/lists/*
-
-# Instalar dependências do sistema
+# Instalar dependências do sistema e o Google Chrome em uma única camada para otimização
 RUN apt-get update && apt-get install -y \
+    # Utilitários necessários
     wget \
     gnupg \
-    unzip \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    unzip \
+    # Dependências essenciais do Chrome
     libglib2.0-0 \
     libnss3 \
     libgconf-2-4 \
@@ -28,22 +25,23 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     libasound2 \
     fonts-liberation \
-    --no-install-recommends
-
-# Segundo, baixe e instale o Google Chrome oficial
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+    --no-install-recommends \
+    # Adiciona o repositório do Chrome e o instala
+    && curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
+    # Limpa o cache do apt para reduzir o tamanho da imagem
     && rm -rf /var/lib/apt/lists/*
 
-RUN rm -rf /var/lib/apt/lists/*
-
-# Instalar ChromeDriver
-RUN CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` \
-    && wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
-    && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
-    && rm /tmp/chromedriver.zip \
+# Instalar ChromeDriver (Sua lógica aqui está boa, mas pode ser simplificada)
+# A versão do chromedriver deve ser compatível com a do Chrome instalada acima.
+# Esta abordagem busca a última versão estável, o que é geralmente correto.
+RUN CHROME_DRIVER_VERSION=$(curl -sS https://storage.googleapis.com/chrome-for-testing-public/last-known-good-versions-with-downloads.json | grep -oP '"linux64","url":"https://storage.googleapis.com/chrome-for-testing-public/[^"]*?chromedriver-linux64.zip' | head -n 1 | cut -d '"' -f 4) \
+    && wget -q -O /tmp/chromedriver.zip ${CHROME_DRIVER_VERSION} \
+    && unzip /tmp/chromedriver.zip -d /tmp/ \
+    && mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/ \
+    && rm -rf /tmp/chromedriver.zip /tmp/chromedriver-linux64 \
     && chmod +x /usr/local/bin/chromedriver
 
 # Copiar arquivos de requisitos
