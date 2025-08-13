@@ -12,6 +12,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import re
+import requests
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +96,13 @@ class CourseScraper:
             
             for i in range(1, max_pages + 1):
                 try:
+                    if query != "":
+                        query_optimized = quote(query)
+                    else:
+                        query_optimized = query
+                        
                     # URL da API da Udemy
-                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query}&skip_price=true&lang={language}&p={i}'
+                    url_api = f'https://www.udemy.com/api-2.0/search-courses/?src=ukw&q={query_optimized}&skip_price=true&lang={language}&p={i}'
                     
                     response = self.udemy_scraper.get(url_api, headers=headers)
                     response.raise_for_status()
