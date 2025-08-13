@@ -8,6 +8,7 @@ from functools import wraps
 import logging
 from .services import JobService
 from .models import JobSearchRequest, JobDetailRequest
+import os
 
 logger = logging.getLogger(__name__)
 
