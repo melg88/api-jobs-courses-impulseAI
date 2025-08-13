@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import re
 import requests
-from urllib.parse import quote
+from urllib.parse import quote_plus
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class CourseScraper:
             cursos_totais = []
             max_pages = min(3, (limit // 12) + 1)  # Udemy retorna ~12 cursos por página
             if query != "":
-                query_optimized = quote(query)
+                query_optimized = quote_plus(query)
             
             for i in range(1, max_pages + 1):
                 try:
