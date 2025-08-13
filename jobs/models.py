@@ -29,7 +29,7 @@ class JobSearchRequest:
             return "Limit deve estar entre 1 e 50"
         
         if self.experience_level and self.experience_level not in [
-            'entry', 'associate', 'mid-senior', 'senior', 'executive'
+            'entry', 'associate', 'mid-senior', 'senior', 'executive', 'internship', 'entry level', 'director'
         ]:
             return "Experience level deve ser entry, associate, mid-senior, senior ou executive"
         
